@@ -1,0 +1,22 @@
+name: hermes-personal
+
+services:
+  hermes:
+    image: nousresearch/hermes-agent:latest
+    stdin_open: true
+    tty: true
+    working_dir: /workspace
+    volumes:
+      - type: bind
+        source: ${HERMES_DATA_DIR}
+        target: /opt/data
+      - type: bind
+        source: ${HERMES_PROJECT_DIR}
+        target: /workspace
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 256
+    mem_limit: 6g
+    cpus: 4
+    restart: "no"
+
