@@ -13,7 +13,7 @@ This launcher runs the entire Hermes Agent process in Docker. It deliberately:
 Start Docker Desktop, then run:
 
 ```sh
-cd ~/Projects/hermes-docker
+cd ~/Desktop/projects/hermes/hermes-docker
 make update
 make setup
 ```
@@ -24,7 +24,7 @@ The setup wizard stores authentication and configuration in
 ## Use Hermes
 
 ```sh
-cd ~/Projects/hermes-docker
+cd ~/Desktop/projects/hermes/hermes-docker
 make tui
 ```
 
