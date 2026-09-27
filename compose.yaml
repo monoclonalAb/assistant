@@ -1,10 +1,9 @@
 name: hermes-personal
 
 services:
-  hermes:
+  gateway:
     image: nousresearch/hermes-agent:latest
-    stdin_open: true
-    tty: true
+    command: ["gateway", "run"]
     working_dir: /workspace
     volumes:
       - type: bind
@@ -13,10 +12,12 @@ services:
       - type: bind
         source: ${HERMES_PROJECT_DIR}
         target: /workspace
+      - type: bind
+        source: ${HERMES_DATA_DIR}/cache/documents
+        target: /output
     security_opt:
       - no-new-privileges:true
     pids_limit: 256
     mem_limit: 6g
     cpus: 4
-    restart: "no"
-
+    restart: unless-stopped

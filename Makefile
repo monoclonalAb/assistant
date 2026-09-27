@@ -1,23 +1,40 @@
-.PHONY: setup chat tui status doctor update shell
+.PHONY: setup gateway-up gateway-down gateway-restart chat tui status doctor update shell logs logs-follow
 
 setup:
-	docker compose run --rm hermes setup
+	docker compose stop gateway
+	docker compose run --rm gateway setup
+	docker compose up -d gateway
 
-chat:
-	docker compose run --rm hermes
+gateway-up:
+	docker compose up -d gateway
 
-tui:
-	docker compose run --rm hermes --tui
+gateway-down:
+	docker compose stop gateway
 
-status:
-	docker compose run --rm hermes status
+gateway-restart:
+	docker compose restart gateway
 
-doctor:
-	docker compose run --rm hermes doctor
+chat: gateway-up
+	docker compose exec gateway hermes
+
+tui: gateway-up
+	docker compose exec gateway hermes --tui
+
+status: gateway-up
+	docker compose exec -T gateway hermes status
+
+doctor: gateway-up
+	docker compose exec -T gateway hermes doctor
 
 update:
-	docker compose pull
+	docker compose pull gateway
+	docker compose up -d gateway
 
-shell:
-	docker compose run --rm hermes bash
+shell: gateway-up
+	docker compose exec gateway bash
 
+logs: gateway-up
+	docker compose exec -T gateway tail -n 100 /opt/data/logs/gateways/default/current
+
+logs-follow: gateway-up
+	docker compose exec gateway tail -F /opt/data/logs/gateways/default/current
