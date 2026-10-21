@@ -5,16 +5,47 @@ services:
     image: nousresearch/hermes-agent:latest
     command: ["gateway", "run"]
     working_dir: /workspace
+    environment:
+      # Cron schedules and timestamps use local time.
+      HERMES_TIMEZONE: ${JARVIS_TIMEZONE:-UTC}
+      TZ: ${JARVIS_TIMEZONE:-UTC}
+      # BlueBubbles runs natively on the Mac and POSTs new iMessages to this
+      # listener. Bind all interfaces *inside* the container; Hermes registers
+      # the webhook as http://localhost:8645, which reaches the loopback-only
+      # port published below.
+      BLUEBUBBLES_WEBHOOK_HOST: 0.0.0.0
+      # The vault is a bind mount owned by the host user; let git operate on
+      # it and attribute the nightly commits to Jarvis.
+      GIT_CONFIG_COUNT: "1"
+      GIT_CONFIG_KEY_0: safe.directory
+      GIT_CONFIG_VALUE_0: /workspace
+      GIT_AUTHOR_NAME: Jarvis
+      GIT_AUTHOR_EMAIL: jarvis@localhost
+      GIT_COMMITTER_NAME: Jarvis
+      GIT_COMMITTER_EMAIL: jarvis@localhost
+    ports:
+      # Loopback only: reachable by BlueBubbles on this Mac, not by the LAN.
+      - "127.0.0.1:8645:8645"
     volumes:
       - type: bind
         source: ${HERMES_DATA_DIR}
         target: /opt/data
+      # Jarvis's memory vault: the only host directory Hermes can write.
       - type: bind
         source: ${HERMES_PROJECT_DIR}
         target: /workspace
       - type: bind
         source: ${HERMES_DATA_DIR}/cache/documents
         target: /output
+      # Version-controlled Jarvis pieces from this repo, read-only to the agent.
+      - type: bind
+        source: ./hermes/skills
+        target: /opt/jarvis/skills
+        read_only: true
+      - type: bind
+        source: ./hermes/scripts/jarvis_dream_collect.py
+        target: /opt/data/scripts/jarvis_dream_collect.py
+        read_only: true
     security_opt:
       - no-new-privileges:true
     pids_limit: 256

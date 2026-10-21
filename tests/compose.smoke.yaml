@@ -1,0 +1,6 @@
+# Overlay used by tests/smoke.sh: publish the webhook on a different host port
+# so the smoke test can run next to the real gateway (which owns 8645).
+services:
+  gateway:
+    ports: !override
+      - "127.0.0.1:${SMOKE_WEBHOOK_PORT:-18645}:8645"
